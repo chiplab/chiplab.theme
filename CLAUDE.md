@@ -51,10 +51,20 @@ shopify theme pull --store=printlabs-app-dev.myshopify.com
 
 ## Deployment Pipeline
 
+### Branch Strategy
+- **`main` branch**: Deploys to production store automatically
+- **`dev` branch**: Deploys to development store automatically
+- **Feature branches**: For local development only
+
 ### Automatic Production Deployment
 - **Trigger**: Push or merge to `main` branch
 - **Action**: GitHub Actions workflow automatically deploys to live store
 - **Configuration**: `.github/workflows/deploy-theme.yml`
+
+### Automatic Development Deployment
+- **Trigger**: Push or merge to `dev` branch
+- **Action**: GitHub Actions workflow automatically deploys to dev store
+- **Configuration**: `.github/workflows/deploy-dev.yml`
 
 ### Manual Production Deployment
 ```bash
@@ -69,17 +79,28 @@ shopify theme push --store=[live-store].myshopify.com --allow-live --theme=[THEM
 
 ## GitHub Configuration
 
-### Required Secrets
+### Required Secrets for Production
 Set these in GitHub repository settings → Secrets and variables → Actions:
-- `SHOPIFY_CLI_THEME_TOKEN`: Authentication token for Shopify CLI
+- `SHOPIFY_ACCESS_TOKEN`: Custom app admin API token from production store
 - `LIVE_STORE_URL`: Production store URL (e.g., chiplab.myshopify.com)
 - `LIVE_THEME_ID`: Theme ID on production store
 
-### Getting the Theme Access Token
-1. Go to Shopify Partners Dashboard
-2. Select your store
-3. Navigate to "Themes" → "Theme Access"
-4. Generate a new token with theme write permissions
+### Required Secrets for Development
+- `DEV_SHOPIFY_ACCESS_TOKEN`: Custom app admin API token from dev store
+- `DEV_STORE_URL`: Development store URL (printlabs-app-dev.myshopify.com)
+- `DEV_THEME_ID`: Theme ID on dev store (178482970919)
+
+### Creating Custom App Tokens (For Store Owner/Partners)
+Since you're both the Store Owner and Partner, use custom apps instead of Partner tokens:
+
+1. Go to your store's admin (both production and dev stores)
+2. Navigate to Settings → Apps and sales channels → Develop apps
+3. Create a new app (e.g., "Theme Deployment")
+4. Configure Admin API scopes:
+   - `read_themes`
+   - `write_themes`
+5. Install the app
+6. Copy the Admin API access token for GitHub secrets
 
 ## Theme Architecture
 
@@ -212,10 +233,14 @@ shopify theme check                  # Run theme linter
 shopify theme console                # Interactive Liquid console
 
 # Git Workflow
+git checkout -b feature/new-feature  # Create feature branch from dev
 git add .                            # Stage changes
 git commit -m "message"              # Commit changes
-git push origin main                 # Deploy to production
-git checkout -b feature/new-feature  # Create feature branch
+git push origin feature/new-feature  # Push feature branch
+git checkout dev                     # Switch to dev branch
+git merge feature/new-feature        # Merge feature to dev (auto-deploys to dev store)
+git checkout main                    # Switch to main branch
+git merge dev                        # Merge dev to main (auto-deploys to production)
 ```
 
 ## Support and Resources
