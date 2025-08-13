@@ -1,0 +1,34 @@
+name: Deploy Theme to Live Store
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install Shopify CLI
+      run: npm install -g @shopify/cli @shopify/theme
+    
+    - name: Deploy theme to live store
+      env:
+        SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+        SHOPIFY_FLAG_STORE: ${{ secrets.LIVE_STORE_URL }}
+      run: |
+        cd theme
+        shopify theme push \
+          --store=$SHOPIFY_FLAG_STORE \
+          --allow-live \
+          --force \
+          --theme="${{ secrets.LIVE_THEME_ID }}"
