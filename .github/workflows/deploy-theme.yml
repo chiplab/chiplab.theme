@@ -28,7 +28,7 @@ jobs:
       run: |
         cd theme
         shopify theme push \
-          --store=$SHOPIFY_FLAG_STORE \
+          --store="${SHOPIFY_FLAG_STORE}" \
           --allow-live \
           --force \
           --theme ${{ secrets.LIVE_THEME_ID }}
