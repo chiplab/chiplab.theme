@@ -31,4 +31,4 @@ jobs:
           --store=$SHOPIFY_FLAG_STORE \
           --allow-live \
           --force \
-          --theme="${{ secrets.LIVE_THEME_ID }}"
+          --theme ${{ secrets.LIVE_THEME_ID }}
